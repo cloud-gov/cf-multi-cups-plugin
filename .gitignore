@@ -3,6 +3,7 @@
 *.dll
 *.so
 *.dylib
+cf_multi_cups
 
 # Test binary, build with `go test -c`
 *.test
