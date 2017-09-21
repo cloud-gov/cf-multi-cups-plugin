@@ -11,7 +11,7 @@ $ go build path/to/downloaded/cf_multi_cups.go
 $ cf install-plugin path/to/generated/binary
 ```
 
-[releases]: https://github.com/18f/releases
+[releases]: https://github.com/18F/cf-multi-cups-plugin/releases
 
 ## Usage
 
