@@ -14,6 +14,7 @@ type MultiCUPSPlugin struct{}
 
 func (c *MultiCUPSPlugin) Run(cliConnection plugin.CliConnection, args []string) {
 	// Ensure that we called the command multi-cups-plugin
+
 	fc, err := parseArguments(args)
 
 	if err != nil {
@@ -21,8 +22,17 @@ func (c *MultiCUPSPlugin) Run(cliConnection plugin.CliConnection, args []string)
 	}
 
 	if args[0] == "multi-cups-plugin" {
-		fmt.Println("Running the multi-cups-plugin for ", fc.String("path"))
-		loadCUPS(fc, cliConnection)
+		loggedIn, err := cliConnection.IsLoggedIn()
+		if err != nil {
+			fmt.Println("The pulgin was unable to determine if you were plugged in. Please try again.")
+		}
+		if loggedIn {
+			fmt.Println("Running the multi-cups-plugin for", fc.String("path"))
+			loadCUPS(fc, cliConnection)
+		} else {
+			exit1("You must be logged in to cloudfoundry to use this command.")
+		}
+
 	}
 }
 
