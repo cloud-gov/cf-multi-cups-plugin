@@ -21,9 +21,8 @@ func (c *MultiCUPSPlugin) Run(cliConnection plugin.CliConnection, args []string)
 	}
 
 	if args[0] == "multi-cups-plugin" {
-		fmt.Println("Running the multi-cups-plugin")
-		fmt.Println(fc.String("path"))
-		loadCUPS(fc.String("path"), cliConnection)
+		fmt.Println("Running the multi-cups-plugin for ", fc.String("path"))
+		loadCUPS(fc, cliConnection)
 	}
 }
 
@@ -56,6 +55,7 @@ func (c *MultiCUPSPlugin) GetMetadata() plugin.PluginMetadata {
 func parseArguments(args []string) (flags.FlagContext, error) {
 	fc := flags.New()
 	fc.NewStringFlag("path", "p", "path to cups json")
+	fc.NewStringFlag("singleservice", "s", "name of the single service to create or update")
 	err := fc.Parse(args...)
 
 	return fc, err
@@ -76,7 +76,10 @@ type CredEntry struct {
 		Name   string           `json:"name"`
 }
 
-func loadCUPS(file string, cliConnection plugin.CliConnection) {
+func loadCUPS(flagArgs flags.FlagContext, cliConnection plugin.CliConnection) {
+	file := flagArgs.String("path")
+	singleService := flagArgs.String("singleservice")
+
 	raw, err := ioutil.ReadFile(file)
 	if err != nil {
 		fmt.Println("unmarshal error")
@@ -98,17 +101,17 @@ func loadCUPS(file string, cliConnection plugin.CliConnection) {
 			fmt.Println(err.Error())
 			continue
 		}
-		//Check if service already exists
-		service, err := cliConnection.GetService(credEntry.Name)
-		fmt.Println(service)
-		if err == nil {
-			fmt.Println("Updating Service")
-			cliConnection.CliCommand("update-user-provided-service", credEntry.Name, "-p", string(b))
-		} else {
-			fmt.Println("Create New Service")
-			cliConnection.CliCommand("create-user-provided-service", credEntry.Name, "-p", string(b))
+		//Screen for single service
+		if len(singleService) == 0 || credEntry.Name == singleService{
+			//Check if service already exists
+			_, err := cliConnection.GetService(credEntry.Name)
+			if err == nil {
+				cliConnection.CliCommand("update-user-provided-service", credEntry.Name, "-p", string(b))
+			} else {
+				fmt.Println("Create New Service")
+				cliConnection.CliCommand("create-user-provided-service", credEntry.Name, "-p", string(b))
+			}
 		}
-
 	}
 
 }
