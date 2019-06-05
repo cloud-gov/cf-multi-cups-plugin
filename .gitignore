@@ -19,3 +19,5 @@ cf_multi_cups
 
 # Data files
 *.json
+
+cf-multi-cups-plugin*
